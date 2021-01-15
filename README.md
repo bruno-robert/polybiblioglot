@@ -16,6 +16,7 @@ cd into it:
 
 (optional) create a python virtual environment:
 `python -m venv env`
+then
 `source ./env/bin/activate`
 
 install python dependancies
