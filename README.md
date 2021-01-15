@@ -8,6 +8,8 @@ A OCR tool to convert books scans into text and automatically translate them.
 
 polybiblioglot uses tesseract for OCR, you will need to follow the steps described [here](https://github.com/tesseract-ocr/tesseract#installing-tesseract) to install tesseract.
 
+On macos, you may find [this gist](https://gist.github.com/henrik/1967035) useful.
+
 ## Installation
 
 Clone the repository:
