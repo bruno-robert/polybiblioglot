@@ -1,13 +1,28 @@
-import threading
-
 from PIL import Image
 import pytesseract
 from dearpygui import core, simple
 import pyperclip
+from pdf2image import convert_from_path
 
 control_window = simple.window("Control", x_pos=0, y_pos=0, height=800)
 current_uid = 0
 
+
+def _pdf_to_images(pdf_path):
+    """
+    Converts a PDF to images and returns the array of images
+    :param pdf_path: The path to the pdf to convert
+    :return: the array of images
+    """
+    return convert_from_path(pdf_path, fmt='jpeg')
+
+
+def get_text_from_dir(path):
+    """
+    Converts all images in a folder to text.
+    :param path:
+    :return:
+    """
 
 def _generate_text_window_unique_names(title):
     """
@@ -56,16 +71,23 @@ def convert_image(sender, data):
     core.run_async_function(_convert_image, image_path, return_handler=_convert_image_return_callback)
 
 
-def _convert_image(sender, image_path):
+def _convert_image(sender, image_path=None, image_data=None):
     """
     The async part of the convert_image function. It does the CPU intensive OCR work and returns the text generated.
+    The path to an image can be provided or the image data itself
     :param sender: dearpygui sender object
     :param image_path: image path list ["path/to/directory", "file_name.png"]
+    :param image_data: some image data
     :return: object containing the image path and image text {"image path": image_path, "image text": image_text}
     """
-    if image_path == "":
+    if (image_path == "" or image_path is None) and image_data is None:
         return
-    image_text = pytesseract.image_to_string(Image.open(image_path[1]))
+    if image_data is not None:
+        image_text = pytesseract.image_to_string(image_data)
+        if image_path is None or image_path == "":
+            image_path = "image"
+    else:
+        image_text = pytesseract.image_to_string(Image.open(image_path[1]))
     return {"image path": image_path, "image text": image_text}
 
 
@@ -81,6 +103,18 @@ def _convert_image_return_callback(sender, data):
     image_text = data["image text"]
     image_path = data["image path"]
     create_text_window(image_text, image_path[1])
+
+
+def convert_images(image_list):
+    for image in image_list:
+        data = _convert_image(None, image_data=image)
+        create_text_window(data["image text"], data["image path"])
+
+
+def convert_pdf(pdf_path):
+    images = _pdf_to_images(pdf_path)
+    convert_images(images)
+
 
 
 def set_image(sender, data):
@@ -113,5 +147,6 @@ with control_window:
 
     # allows user to either save converted text to a window for clipboard access or save it to a file
     core.add_checkbox("save to file")
+    core.add_button("Convert PDF", callback=lambda *_: convert_pdf(core.get_data("image path")[1]))
 
 core.start_dearpygui()
