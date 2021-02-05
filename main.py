@@ -151,9 +151,6 @@ class Polybiblioglot:
         payload.file_path = os.path.join(*data)
         payload.file_name = data[1]
         self.create_convert_window(payload)
-        # core.add_data("file path", os.path.join(*data))
-        # core.set_value("file path", os.path.join(*data))
-        # core.set_value("file name", data[1])
 
 
 if __name__ == '__main__':
