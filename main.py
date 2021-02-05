@@ -27,6 +27,10 @@ class Polybiblioglot:
             # core.add_checkbox("save to file")
 
     def start(self):
+        """
+        Starts the app
+        :return:
+        """
         core.start_dearpygui()
 
     def _get_uid(self):
