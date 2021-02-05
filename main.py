@@ -30,15 +30,6 @@ class Polybiblioglot:
             # allow user to select image to convert
             core.add_text("Select an Image or PDF")
             core.add_button("Select file", callback=lambda *_: core.open_file_dialog(callback=self.select_file))
-            # core.add_button("Convert file", callback=self.convert_file)
-
-            # display the selected image name
-            # core.add_text("Selected file:")
-            # core.add_text("...", source="file name")
-            # core.add_text("...", source="file path")
-
-            # allows user to either save converted text to a window for clipboard access or save it to a file
-            # core.add_checkbox("save to file")
 
     def start(self):
         """
