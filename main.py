@@ -11,13 +11,18 @@ class Payload:
         This is used so that different elements of the object have predefined type. It allows for more consistant
         null checking.
         """
-        self.delete: str = ''  # an element to delete
+        self.delete: [str] = []  # list of elements to delete
+        self.disable: [str] = []  # list of elements to disable
+        self.enable: [str] = []  # list of elements to enable
         self.display_before: str = ''  # when inserting, insert before display_before
         self.file_path: str = ''  # path to a file
         self.file_name: str = ''  # name of a file
         self.parent: str = ''  # parent name
-        self.pages: [str] = None  # pages list
+        self.pages: [str] = []  # pages list
         self.text: str = ''  # any kind of text
+        self.data_name: str = ''  # a data object
+        self.value_name: str = ''  # a value object
+        self.language: str = ''  # a language
 
 
 class Polybiblioglot:
@@ -84,18 +89,51 @@ class Polybiblioglot:
         convert_window = simple.window(window_title)
         with convert_window:
             # widget ids
-            bottom_spacer = f'bottom_{str(unique_id)}'
-            convert_button = f'convert_{str(unique_id)}'
-            core.add_text(payload.file_name)
-            core.add_spacing(count=1, name=f'top_{str(unique_id)}')
-            core.add_spacing(count=1, name=bottom_spacer)
-            convert_payload = Payload()
-            convert_payload.display_before = bottom_spacer
-            convert_payload.file_path = payload.file_path
-            convert_payload.parent = window_title
-            convert_payload.delete = convert_button
-            core.add_button(convert_button, label='Convert to Text',
-                            callback=self.convert_file, callback_data=convert_payload)
+            top_spacer = f'top_{unique_id}'
+            bottom_spacer = f'bottom_{unique_id}'
+            convert_button = f'convert_{unique_id}'
+            translate_button = f'translate_{unique_id}'
+            text_spacer = f'text_spacer_{unique_id}'
+            translated_text_spacer = f'translated_text_spacer_{unique_id}'
+            tab_bar_name = f'tab_bar_{unique_id}'
+            tab_names = [f'controls_{unique_id}', f'text_{unique_id}', f'translated_{unique_id}']
+            tabs = []
+
+            # Creating widgets
+            tab_bar = simple.tab_bar(tab_bar_name)
+            with tab_bar:
+                tabs += [simple.tab(tab_names[0], label="Controls")]
+                tabs += [simple.tab(tab_names[1], label="Text")]
+                tabs += [simple.tab(tab_names[2], label="Translation")]
+
+                with tabs[0]:
+                    core.add_text(payload.file_name)
+                    core.add_spacing(count=1, name=top_spacer)
+                    core.add_spacing(count=1, name=bottom_spacer)
+
+                    # Creating payload for the convert button
+                    convert_payload = Payload()
+                    convert_payload.display_before = text_spacer
+                    convert_payload.file_path = payload.file_path
+                    convert_payload.parent = window_title
+                    convert_payload.disable = [convert_button]
+                    convert_payload.enable = [translate_button]
+                    core.add_button(convert_button, label='Convert to Text',
+                                    callback=self.convert_file, callback_data=convert_payload)
+
+                    translate_payload = Payload()
+                    core.add_button(translate_button, label='Translate Text', enabled=False,
+                                    callback=self.translate_text, callback_data=translate_payload)
+                with tabs[1]:
+                    core.add_text('File Text:')
+                    core.add_spacing(count=1, name=text_spacer)
+
+                with tabs[2]:
+                    core.add_text('Translated text:')
+                    core.add_spacing(count=1, name=translated_text_spacer)
+
+
+        # add the window to the window list
         self.convert_window_list += [convert_window]
 
     def convert_file(self, sender, data: Payload):
@@ -108,8 +146,12 @@ class Polybiblioglot:
         :return: None
         """
         # if the data has a delete element, delete it
-        if data.delete != '':
-            core.delete_item(data.delete)
+        if data.delete:
+            for name in data.delete:
+                core.delete_item(name)
+        if data.disable:
+            for name in data.disable:
+                core.configure_item(name, enabled=False)
         core.run_async_function(self._convert_file, data, return_handler=self._convert_file_return_callback)
 
     def _convert_file(self, sender, data: Payload):
@@ -132,11 +174,17 @@ class Polybiblioglot:
         :param data: Payload object
         :return: None
         """
-        if data.pages is None:
+        if not data.pages:
             print("No file selected or file is of the wrong type.")
             return
         for page in data.pages:
             core.add_text(page, parent=data.parent, before=data.display_before)
+        if data.enable:
+            for name in data.enable:
+                core.configure_item(name, enabled=True)
+
+    def translate_text(self, sender, data: Payload):
+        pass
 
     def select_file(self, sender, data):
         """
