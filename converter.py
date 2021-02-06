@@ -74,7 +74,7 @@ class Converter:
         """
         if path is None:
             print("Not path provided!")
-            return
+            return []
         if path.lower().endswith('.pdf'):
             return self.convert_pdf(pdf_path=path)
         elif path.lower().endswith(('.png', '.jpg', '.jpeg')):
