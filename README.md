@@ -41,3 +41,13 @@ install python dependancies
 
 To run polybiblioglot, simply execute the main.py file
 `python main.py`
+
+# Notes and limitation (for now)
+
+## Limitations
+- Currently, polybiblioglot uses a free API for translation that is limited both in terms of how many calls we can make per day, but also limits each query to 500 chars.
+- The OCR method used is optimized for high acuracy and not speed. I might add the functionality to change this in the future.
+
+## Notes
+
+- All computationally expensive or I/O intensive tasks are run asynchronously. This keeps the UI snappy. I'm currently using the DearPyGUI asynchronous call method wich will be depricated in the next version. A migration to python's out of the box threading library will be needed at that point.
