@@ -91,7 +91,8 @@ class Polybiblioglot:
         unique_id = self._get_uid()
         window_title = f'{payload.file_name}_{str(unique_id)}'
 
-        convert_window = simple.window(window_title)
+        convert_window = simple.window(window_title, width=450, height=600,
+                                       y_pos=0 + (20 * unique_id), x_pos=200 + (20 * unique_id))
         with convert_window:
             # widget ids
             top_spacer = f'top_{unique_id}'
@@ -104,8 +105,9 @@ class Polybiblioglot:
             tab_names = [f'controls_{unique_id}', f'text_{unique_id}', f'translated_{unique_id}']
             tabs = []
             text_value_name = f'text_{unique_id}'  # the name of the value holding the text gathered from OCR
-            translated_text_value_name = f'translated_text_{unique_id}'  # the name of the value holding the text gathered from OCR
+            translated_text_value_name = f'translated_text_{unique_id}'  # the name of the value holding the translation
             core.add_value(text_value_name, '')  # the value that stores the OCR text
+            core.add_value(translated_text_value_name, '')  # the value that stores the translated text
 
             # Creating widgets
             tab_bar = simple.tab_bar(tab_bar_name)
@@ -135,9 +137,14 @@ class Polybiblioglot:
                     translate_payload.destination_value_name = translated_text_value_name
                     translate_payload.source_language = lang['German']
                     translate_payload.destination_language = lang['French']
+                    translate_payload.disable = [translate_button]
+                    translate_payload.enable = [translate_button]
 
                     core.add_button(translate_button, label='Translate Text', enabled=False,
                                     callback=self.translate_text, callback_data=translate_payload)
+
+                    core.add_button(f'save_text_{unique_id}', label='save text')
+                    core.add_button(f'save_translation_{unique_id}', label='save translation')
 
                 # creating the Text tab
                 with tabs[1]:
@@ -151,6 +158,8 @@ class Polybiblioglot:
                 with tabs[2]:
                     core.add_text('Translated text:')
                     core.add_spacing(count=1, name=translated_text_spacer)
+
+                    # this is the text box that holds the translated text response
                     core.add_text(f'translated_text_box_{unique_id}', source=translated_text_value_name)
 
 
@@ -167,12 +176,8 @@ class Polybiblioglot:
         :return: None
         """
         # if the data has a delete element, delete it
-        if data.delete:
-            for name in data.delete:
-                core.delete_item(name)
-        if data.disable:
-            for name in data.disable:
-                core.configure_item(name, enabled=False)
+        self._delete_widgets(data.delete)
+        self._disable_widgets(data.disable)
         core.run_async_function(self._convert_file, data, return_handler=self._convert_file_return_callback)
 
     def _convert_file(self, sender, data: Payload):
@@ -203,16 +208,49 @@ class Polybiblioglot:
         for page in data.pages:
             full_text = f'{page} - - - - - \n{full_text}'
         core.set_value(data.value_name, full_text)
-            # core.add_text(page, parent=data.parent, before=data.display_before)
-        if data.enable:
-            for name in data.enable:
-                core.configure_item(name, enabled=True)
+        self._enable_widgets(data.enable)
 
     def translate_text(self, sender, data: Payload):
+        """
+        Will use data.value_name (as a key) to get text in the value storage.
+        It will then asynchronously translate the text.
+        The source language is defined in the data.source_language attribute
+        The destination language is defined in the data.destination_language
+        The translated text is stored back into a value storage using data.destination_value_name as a key
+        :param sender:
+        :param data: Payload object containing the text and source+destination languages
+        :return:
+        """
+        self._disable_widgets(data.disable)
+
         text = core.get_value(data.value_name)
+        data.text = text
+        core.run_async_function(self._translate_text, data, return_handler=self._translate_text_callback)
+        return data
+
+    def _translate_text(self, sender, data: Payload):
+        """
+        Asynchronous portion of the translate_text method.
+        This is when the API is executed. The results are passed to the callback in the data.text attribute.
+        :param sender:
+        :param data: Payload object used to pass the translated text.
+        :return:
+        """
         translate = Translator(from_lang=data.source_language, to_lang=data.destination_language)
-        translated_text = translate.translate(text)
-        core.set_value(data.destination_value_name, translated_text)
+        translated_text = translate.translate(data.text[:499])
+        data.text = translated_text
+        return data
+
+    def _translate_text_callback(self, sender, data: Payload):
+        """
+        The callback portion of the translate_text method.
+        Here the translated text is taken from data and put into the value storage with key data.destination_value_name.
+        :param sender:
+        :param data: Payload object
+        :return:
+        """
+        core.set_value(data.destination_value_name, data.text)
+        self._enable_widgets(data.enable)
 
     def select_file(self, sender, data):
         """
@@ -228,6 +266,35 @@ class Polybiblioglot:
         payload.file_name = data[1]
         self.create_convert_window(payload)
 
+    def _disable_widgets(self, widgets: [str]):
+        """
+        Helper function that takes a list of widget names (ids) and disables them
+        :param widgets: list of widget names
+        :return:
+        """
+        if widgets:
+            for name in widgets:
+                core.configure_item(name, enabled=False)
+
+    def _enable_widgets(self, widgets: [str]):
+        """
+        Helper function that takes a list of widget names (ids) and enables them
+        :param widgets: list of widgets
+        :return:
+        """
+        if widgets:
+            for name in widgets:
+                core.configure_item(name, enabled=True)
+
+    def _delete_widgets(self, widgets: [str]):
+        """
+        Helper function that takes a list of widget names (ids) and deletes them
+        :param widgets: list of widgets
+        :return:
+        """
+        if widgets:
+            for name in widgets:
+                core.delete_item(name)
 
 if __name__ == '__main__':
     pbg = Polybiblioglot()
