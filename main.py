@@ -36,6 +36,7 @@ class Polybiblioglot:
         self.current_uid = 0
         self.control_window = simple.window("Control", x_pos=0, y_pos=0, height=800)
         self.convert_window_list = []  # todo: this stores windows indefinitely. Figure out a way to delete them.
+        self.data_to_save = ''  # this is the data that will be written to the disk by self.save_text
         with self.control_window:
             # allow user to select image to convert
             core.add_text("Select an Image or PDF")
@@ -85,6 +86,12 @@ class Polybiblioglot:
         """
         Creates a convert window. This window represents a file. From this window you can convert the file to text.
         Then translate the text. And finally you can save it to a file.
+        The window has 3 tabs. The first tab contains all the controls for:
+        - converting the file
+        - translated the converted file
+        - save the text to disk
+        - save ethe translation to disk
+
         :param payload: Payload object
         :return:
         """
@@ -97,8 +104,12 @@ class Polybiblioglot:
             # widget ids
             top_spacer = f'top_{unique_id}'
             bottom_spacer = f'bottom_{unique_id}'
+
             convert_button = f'convert_{unique_id}'
             translate_button = f'translate_{unique_id}'
+            save_text_button = f'save_text_{unique_id}'
+            save_translation_button = f'save_translation_{unique_id}'
+
             text_spacer = f'text_spacer_{unique_id}'
             translated_text_spacer = f'translated_text_spacer_{unique_id}'
             tab_bar_name = f'tab_bar_{unique_id}'
@@ -128,7 +139,7 @@ class Polybiblioglot:
                     convert_payload.file_path = payload.file_path
                     convert_payload.parent = window_title
                     convert_payload.disable = [convert_button]
-                    convert_payload.enable = [translate_button]
+                    convert_payload.enable = [translate_button, save_text_button]
                     core.add_button(convert_button, label='Convert to Text',
                                     callback=self.convert_file, callback_data=convert_payload)
 
@@ -138,13 +149,19 @@ class Polybiblioglot:
                     translate_payload.source_language = lang['German']
                     translate_payload.destination_language = lang['French']
                     translate_payload.disable = [translate_button]
-                    translate_payload.enable = [translate_button]
+                    translate_payload.enable = [translate_button, save_translation_button]
 
                     core.add_button(translate_button, label='Translate Text', enabled=False,
                                     callback=self.translate_text, callback_data=translate_payload)
 
-                    core.add_button(f'save_text_{unique_id}', label='save text')
-                    core.add_button(f'save_translation_{unique_id}', label='save translation')
+                    save_text_payload = Payload()
+                    save_text_payload.value_name = text_value_name
+                    core.add_button(save_text_button, label='Save Text', callback=self.save_prompt,
+                                    callback_data=save_text_payload, enabled=False)
+                    save_translation_payload = Payload()
+                    save_translation_payload.value_name = translated_text_value_name
+                    core.add_button(save_translation_button, label='Save Translation',
+                                    callback=self.save_prompt, callback_data=save_translation_payload, enabled=False)
 
                 # creating the Text tab
                 with tabs[1]:
@@ -165,6 +182,28 @@ class Polybiblioglot:
 
         # add the window to the window list
         self.convert_window_list += [convert_window]
+
+    def save_prompt(self, sender, data: Payload):
+        """
+        This helper fucntion will set the self.data_to_save attribute using the value passed in data.value_name.
+        It will then open a file prompt that will save the data in self.data_to_save to the select file
+        :param sender:
+        :param data: Payload object
+        :return:
+        """
+        self.data_to_save = core.get_value(data.value_name)
+        core.open_file_dialog(callback=self.save_text)
+
+    def save_text(self, sender, data):
+        """
+        Writes the data in self.data_to_save to the given file path in data.
+        :param sender:
+        :param data: file path in the format returned by a file prompt
+        :return:
+        """
+        # TODO: warn user about overwriting files
+        with open(os.path.join(*data), 'w') as f:
+            f.write(self.data_to_save)
 
     def convert_file(self, sender, data: Payload):
         """
