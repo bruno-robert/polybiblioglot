@@ -9,3 +9,4 @@ python-dateutil==2.8.1
 six==1.15.0
 
 pdf2image~=1.14.0
+translate~=3.5.0
