@@ -2,6 +2,9 @@ import os
 from dearpygui import core, simple
 import pyperclip
 from converter import Converter
+from translate import Translator
+from enum import Enum
+from languages import lang
 
 
 class Payload:
@@ -22,7 +25,9 @@ class Payload:
         self.text: str = ''  # any kind of text
         self.data_name: str = ''  # a data object
         self.value_name: str = ''  # a value object
-        self.language: str = ''  # a language
+        self.destination_value_name: str = ''
+        self.source_language: str = ''  # source language (for translation)
+        self.destination_language: str = ''  # source language (for translation)
 
 
 class Polybiblioglot:
@@ -98,6 +103,9 @@ class Polybiblioglot:
             tab_bar_name = f'tab_bar_{unique_id}'
             tab_names = [f'controls_{unique_id}', f'text_{unique_id}', f'translated_{unique_id}']
             tabs = []
+            text_value_name = f'text_{unique_id}'  # the name of the value holding the text gathered from OCR
+            translated_text_value_name = f'translated_text_{unique_id}'  # the name of the value holding the text gathered from OCR
+            core.add_value(text_value_name, '')  # the value that stores the OCR text
 
             # Creating widgets
             tab_bar = simple.tab_bar(tab_bar_name)
@@ -106,6 +114,7 @@ class Polybiblioglot:
                 tabs += [simple.tab(tab_names[1], label="Text")]
                 tabs += [simple.tab(tab_names[2], label="Translation")]
 
+                # creating the control tab
                 with tabs[0]:
                     core.add_text(payload.file_name)
                     core.add_spacing(count=1, name=top_spacer)
@@ -113,7 +122,7 @@ class Polybiblioglot:
 
                     # Creating payload for the convert button
                     convert_payload = Payload()
-                    convert_payload.display_before = text_spacer
+                    convert_payload.value_name = text_value_name
                     convert_payload.file_path = payload.file_path
                     convert_payload.parent = window_title
                     convert_payload.disable = [convert_button]
@@ -122,15 +131,27 @@ class Polybiblioglot:
                                     callback=self.convert_file, callback_data=convert_payload)
 
                     translate_payload = Payload()
+                    translate_payload.value_name = text_value_name
+                    translate_payload.destination_value_name = translated_text_value_name
+                    translate_payload.source_language = lang['German']
+                    translate_payload.destination_language = lang['French']
+
                     core.add_button(translate_button, label='Translate Text', enabled=False,
                                     callback=self.translate_text, callback_data=translate_payload)
+
+                # creating the Text tab
                 with tabs[1]:
                     core.add_text('File Text:')
                     core.add_spacing(count=1, name=text_spacer)
 
+                    # this is the text box that holds the text extracted with OCR
+                    core.add_text(f'text_box_{unique_id}', source=text_value_name)
+
+                # creating the Translation tab
                 with tabs[2]:
                     core.add_text('Translated text:')
                     core.add_spacing(count=1, name=translated_text_spacer)
+                    core.add_text(f'translated_text_box_{unique_id}', source=translated_text_value_name)
 
 
         # add the window to the window list
@@ -177,14 +198,21 @@ class Polybiblioglot:
         if not data.pages:
             print("No file selected or file is of the wrong type.")
             return
+
+        full_text = ''
         for page in data.pages:
-            core.add_text(page, parent=data.parent, before=data.display_before)
+            full_text = f'{page} - - - - - \n{full_text}'
+        core.set_value(data.value_name, full_text)
+            # core.add_text(page, parent=data.parent, before=data.display_before)
         if data.enable:
             for name in data.enable:
                 core.configure_item(name, enabled=True)
 
     def translate_text(self, sender, data: Payload):
-        pass
+        text = core.get_value(data.value_name)
+        translate = Translator(from_lang=data.source_language, to_lang=data.destination_language)
+        translated_text = translate.translate(text)
+        core.set_value(data.destination_value_name, translated_text)
 
     def select_file(self, sender, data):
         """
