@@ -5,6 +5,9 @@ from PIL import Image
 
 class Converter:
     def __init__(self):
+        """
+        Converter objects are used to convert images or pdf to text.
+        """
         pass
 
     @staticmethod
@@ -41,16 +44,6 @@ class Converter:
             text_list += [text]
         return text_list
 
-    @staticmethod
-    def _pdf_to_images(pdf_path):
-        """
-        Converts a PDF to images and returns the array of images
-
-        :param pdf_path: The path to the pdf to convert
-        :return: the array of images
-        """
-        return convert_from_path(pdf_path, fmt='jpeg')
-
     def convert_pdf(self, pdf_path) -> [str]:
         """
         Converts a pdf to text. The output is an array of text with each page of the pdf being an element of the
@@ -59,7 +52,9 @@ class Converter:
         :param pdf_path: path to the pdf
         :return: array of text (1 page in pdf = 1 element)
         """
-        images = self._pdf_to_images(pdf_path)
+
+        # convert the pdf to and array of images
+        images = convert_from_path(pdf_path, fmt='jpeg')
         pdf_pages_txt = self.convert_images(images)
         return pdf_pages_txt
 
