@@ -3,7 +3,6 @@ from dearpygui import core, simple
 import pyperclip
 from converter import Converter
 from translate import Translator
-from enum import Enum
 from languages import lang
 
 
@@ -26,8 +25,8 @@ class Payload:
         self.data_name: str = ''  # a data object
         self.value_name: str = ''  # a value object
         self.destination_value_name: str = ''
-        self.source_language: str = ''  # source language (for translation)
-        self.destination_language: str = ''  # source language (for translation)
+        self.source_language_value: str = ''  # source language (for translation)
+        self.destination_language_value: str = ''  # source language (for translation)
 
 
 class Polybiblioglot:
@@ -41,6 +40,13 @@ class Polybiblioglot:
             # allow user to select image to convert
             core.add_text("Select an Image or PDF")
             core.add_button("Select file", callback=lambda *_: core.open_file_dialog(callback=self.select_file))
+            language_list = list(lang.keys())
+            core.add_text("Default Source Language:")
+            core.add_combo(f'default_source_language', label='Default Source Language', items=language_list,
+                           default_value='German')
+            core.add_text("Default Destiation Language:")
+            core.add_combo(f'default_destination_language', label='Default Destination Language', items=language_list,
+                           default_value='French')
 
     def start(self):
         """
@@ -116,6 +122,8 @@ class Polybiblioglot:
             tab_names = [f'controls_{unique_id}', f'text_{unique_id}', f'translated_{unique_id}']
             tabs = []
             text_value_name = f'text_{unique_id}'  # the name of the value holding the text gathered from OCR
+            source_lang_combo_name = f'text_language{unique_id}'
+            destination_lang_combo_name = f'destination_language{unique_id}'
             translated_text_value_name = f'translated_text_{unique_id}'  # the name of the value holding the translation
             core.add_value(text_value_name, '')  # the value that stores the OCR text
             core.add_value(translated_text_value_name, '')  # the value that stores the translated text
@@ -133,6 +141,11 @@ class Polybiblioglot:
                     core.add_spacing(count=1, name=top_spacer)
                     core.add_spacing(count=1, name=bottom_spacer)
 
+                    language_list = list(lang.keys())
+                    core.add_combo(source_lang_combo_name, label='Source Language', items=language_list,
+                                   default_value=core.get_value('default_source_language'))
+                    core.add_combo(destination_lang_combo_name, label='Destination Language',
+                                   items=language_list, default_value=core.get_value('default_destination_language'))
                     # Creating payload for the convert button
                     convert_payload = Payload()
                     convert_payload.value_name = text_value_name
@@ -146,8 +159,8 @@ class Polybiblioglot:
                     translate_payload = Payload()
                     translate_payload.value_name = text_value_name
                     translate_payload.destination_value_name = translated_text_value_name
-                    translate_payload.source_language = lang['German']
-                    translate_payload.destination_language = lang['French']
+                    translate_payload.source_language_value = source_lang_combo_name
+                    translate_payload.destination_language_value = destination_lang_combo_name
                     translate_payload.disable = [translate_button]
                     translate_payload.enable = [translate_button, save_translation_button]
 
@@ -275,7 +288,9 @@ class Polybiblioglot:
         :param data: Payload object used to pass the translated text.
         :return:
         """
-        translate = Translator(from_lang=data.source_language, to_lang=data.destination_language)
+        source_lang = lang[core.get_value(data.source_language_value)]
+        destination_lang = lang[core.get_value(data.destination_language_value)]
+        translate = Translator(from_lang=source_lang, to_lang=destination_lang)
         translated_text = translate.translate(data.text[:499])
         data.text = translated_text
         return data
