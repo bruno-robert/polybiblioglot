@@ -1,3 +1,7 @@
+The official repo URL is https://gitlab.com/-/ide/project/brunorobert/polybiblioglot
+Although there is a github repository located at https://github.com/bruno-robert/polybiblioglot. All new commits, pull requests, issues should be created on gitlab. 
+The github repository is setup to mirror the gitlab repository.
+
 # polybiblioglot
 
 A OCR tool to convert books scans into text and automatically translate them.
