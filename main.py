@@ -2,8 +2,8 @@ import os
 from dearpygui import core, simple
 import pyperclip
 from converter import Converter
-from translate import Translator
 from languages import lang
+from translator import MultiTranslator, TRANSLATOR_TYPES
 
 
 class Payload:
@@ -32,6 +32,7 @@ class Payload:
 class Polybiblioglot:
     def __init__(self):
         self.converter = Converter()
+        self.translator = MultiTranslator(TRANSLATOR_TYPES.translator)
         self.current_uid = 0
         self.control_window = simple.window("Control", x_pos=0, y_pos=0, height=800)
         self.convert_window_list = []  # todo: this stores windows indefinitely. Figure out a way to delete them.
@@ -192,7 +193,6 @@ class Polybiblioglot:
                     # this is the text box that holds the translated text response
                     core.add_text(f'translated_text_box_{unique_id}', source=translated_text_value_name)
 
-
         # add the window to the window list
         self.convert_window_list += [convert_window]
 
@@ -290,8 +290,7 @@ class Polybiblioglot:
         """
         source_lang = lang[core.get_value(data.source_language_value)]
         destination_lang = lang[core.get_value(data.destination_language_value)]
-        translate = Translator(from_lang=source_lang, to_lang=destination_lang)
-        translated_text = translate.translate(data.text[:499])
+        translated_text = self.translator.translate(data.text, source_lang, destination_lang)
         data.text = translated_text
         return data
 
@@ -349,6 +348,7 @@ class Polybiblioglot:
         if widgets:
             for name in widgets:
                 core.delete_item(name)
+
 
 if __name__ == '__main__':
     pbg = Polybiblioglot()
