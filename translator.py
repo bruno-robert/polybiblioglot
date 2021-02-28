@@ -63,10 +63,11 @@ class MultiTranslator:
             raise InvalidTranslationMethod("Translation method is invalid")
 
         if translation_method == TRANSLATOR_TYPES.translator:
+            self.logger.debug('Translating with the translator module')
             translate = Translator(from_lang=source, to_lang=destination)
             output = translate.translate(text[:499])
         elif translation_method == TRANSLATOR_TYPES.ibm:
-            print('translating with IBM')
+            self.logger.debug('Translating with IBM')
             try:
                 api_token = authentication['token']
             except:
