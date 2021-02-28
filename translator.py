@@ -13,6 +13,18 @@ TRANSLATOR_TYPES.ibm = 'ibm'
 # currently supported API are the free API ins the translate module
 # IBM cloud free tier
 
+class InvalidTranslationMethod(Exception):
+    pass
+
+
+class AuthenticationError(Exception):
+    pass
+
+
+class ApiError(Exception):
+    pass
+
+
 class MultiTranslator:
     def __init__(self, translator_type: str, logger: logging.Logger = logging.Logger('MultiTranslator')):
         self.logger = logger
