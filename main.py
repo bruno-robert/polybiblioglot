@@ -1,9 +1,9 @@
-import os
+import os, logging
 from dearpygui import core, simple
 import pyperclip
 from converter import Converter
 from languages import lang
-from translator import MultiTranslator, TRANSLATOR_TYPES
+from translator import MultiTranslator, TRANSLATOR_TYPES, ApiError, AuthenticationError
 
 
 class Payload:
@@ -32,7 +32,7 @@ class Payload:
 class Polybiblioglot:
     def __init__(self):
         self.converter = Converter()
-        self.translator = MultiTranslator(TRANSLATOR_TYPES.translator)
+        self.translator: MultiTranslator = MultiTranslator(TRANSLATOR_TYPES.translator)
         self.current_uid = 0
         self.control_window = simple.window("Control", x_pos=0, y_pos=0, height=800)
         self.convert_window_list = []  # todo: this stores windows indefinitely. Figure out a way to delete them.
@@ -48,6 +48,13 @@ class Polybiblioglot:
             core.add_text("Default Destiation Language:")
             core.add_combo(f'default_destination_language', label='Default Destination Language', items=language_list,
                            default_value='French')
+
+            core.add_text("Translation Method:")
+            core.add_combo(f'translation_method', label='Translation Method',
+                           items=list(TRANSLATOR_TYPES.__dict__.values()), default_value=TRANSLATOR_TYPES.translator)
+
+            core.add_text('API token (if using IBM)')
+            core.add_input_text(f'api_token', label='API Token', password=True)
 
     def start(self):
         """
@@ -267,7 +274,14 @@ class Polybiblioglot:
         """
         source_lang = lang[core.get_value(data.source_language_value)]
         destination_lang = lang[core.get_value(data.destination_language_value)]
-        translated_text = self.translator.translate(data.text, source_lang, destination_lang)
+        try:
+            translated_text = self.translator.translate(data.text, source_lang, destination_lang,
+                                                    translation_method=core.get_value('translation_method'),
+                                                    authentication={'token': core.get_value('api_token')})
+        except ApiError as e:
+            print(f'{e}')  # TODO: make this logging
+            translated_text = f'{e}'
+
         data.text = translated_text
         return data
 
