@@ -66,29 +66,6 @@ class Polybiblioglot:
         self.current_uid += 1
         return uid
 
-    def create_text_window(self, payload: Payload):
-        """
-        Creates a text window. It's simply a window with some text. There are two copy to clipboard buttons. One above
-        and one bellow the text.
-        Use this to create a window containing a lot of text.
-        :param payload: Payload object
-        :return: None
-        """
-        unique_id = self._get_uid()
-        unique_ids = [
-            f"{payload.file_name}_{str(unique_id)}",
-            f"top_copy_btn_{str(unique_id)}",
-            f"bottom_copy_btn_{str(unique_id)}"
-        ]
-        with simple.window(unique_ids[0]):
-            core.add_button(unique_ids[1], label="Copy to clipboard",
-                            callback=lambda source, data: pyperclip.copy(data),
-                            callback_data=payload.text)
-            core.add_text(payload.text)
-            core.add_button(unique_ids[2], label="Copy to clipboard",
-                            callback=lambda source, data: pyperclip.copy(data),
-                            callback_data=payload.text)
-
     def create_convert_window(self, payload: Payload):
         """
         Creates a convert window. This window represents a file. From this window you can convert the file to text.
