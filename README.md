@@ -49,7 +49,6 @@ To run polybiblioglot, simply execute the main.py file
 # Notes and limitation (for now)
 
 ## Limitations
-- Currently, polybiblioglot uses a free API for translation that is limited both in terms of how many calls we can make per day, but also limits each query to 500 chars.
 - The OCR method used is optimized for high acuracy and not speed. I might add the functionality to change this in the future.
 
 ## Notes
