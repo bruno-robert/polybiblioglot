@@ -44,18 +44,18 @@ class Polybiblioglot:
             core.add_button("Select file", callback=lambda *_: core.open_file_dialog(callback=self.select_file))
             language_list = list(lang.keys())
             core.add_text("Default Source Language:")
-            core.add_combo(f'default_source_language', label='Default Source Language', items=language_list,
+            core.add_combo(f'default_source_language', label='', items=language_list,
                            default_value='German')
             core.add_text("Default Destiation Language:")
-            core.add_combo(f'default_destination_language', label='Default Destination Language', items=language_list,
+            core.add_combo(f'default_destination_language', label='', items=language_list,
                            default_value='French')
 
             core.add_text("Translation Method:")
-            core.add_combo(f'translation_method', label='Translation Method',
+            core.add_combo(f'translation_method', label='',
                            items=list(TRANSLATOR_TYPES.__dict__.values()), default_value=TRANSLATOR_TYPES.translator)
 
             core.add_text('API token (if using IBM)')
-            core.add_input_text(f'api_token', label='API Token', password=True)
+            core.add_input_text(f'api_token', label='', password=True)
 
     def start(self):
         """
