@@ -1,9 +1,12 @@
-import os, argparse, logging
+import argparse
+import logging
+import os
+
 from dearpygui import core, simple
-import pyperclip
+
 from converter import Converter
 from languages import lang
-from translator import MultiTranslator, TRANSLATOR_TYPES, ApiError, AuthenticationError
+from translator import MultiTranslator, TRANSLATOR_TYPES, ApiError
 
 
 class Payload:
@@ -199,7 +202,7 @@ class Polybiblioglot:
         :param data: file path in the format returned by a file prompt
         :return:
         """
-        # TODO: warn user about overwriting files
+        # TODO: prompt user about overwriting files
         with open(os.path.join(*data), 'w') as f:
             f.write(self.data_to_save)
 
