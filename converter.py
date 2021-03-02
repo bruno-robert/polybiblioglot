@@ -1,13 +1,15 @@
 from pdf2image import convert_from_path
 import pytesseract
+import logging
 from PIL import Image
 
 
 class Converter:
-    def __init__(self):
+    def __init__(self, logger=logging.getLogger(__name__)):
         """
         Converter objects are used to convert images or pdf to text.
         """
+        self.logger = logger
         pass
 
     @staticmethod
@@ -68,14 +70,14 @@ class Converter:
         :return: array containing text extracted from image or pdf
         """
         if path is None:
-            print("Not path provided!")
+            self.logger.error('Conversion aborted. No path provided.')
             return []
         if path.lower().endswith('.pdf'):
             return self.convert_pdf(pdf_path=path)
         elif path.lower().endswith(('.png', '.jpg', '.jpeg')):
             return [self.convert_image(image_path=path)]
         else:
-            print("file type not supported")
+            self.logger.error('Conversion aborted. File type unsupported.')
 
     def get_text_from_dir(self, path):
         """

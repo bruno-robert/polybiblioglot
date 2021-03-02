@@ -1,9 +1,12 @@
-import os, logging
+import argparse
+import logging
+import os
+
 from dearpygui import core, simple
-import pyperclip
+
 from converter import Converter
 from languages import lang
-from translator import MultiTranslator, TRANSLATOR_TYPES, ApiError, AuthenticationError
+from translator import MultiTranslator, TRANSLATOR_TYPES, ApiError
 
 
 class Payload:
@@ -30,9 +33,10 @@ class Payload:
 
 
 class Polybiblioglot:
-    def __init__(self):
-        self.converter = Converter()
-        self.translator: MultiTranslator = MultiTranslator(TRANSLATOR_TYPES.translator)
+    def __init__(self, logger=logging.getLogger(__name__)):
+        self.logger = logger
+        self.converter = Converter(logger=logger)
+        self.translator: MultiTranslator = MultiTranslator(TRANSLATOR_TYPES.translator, logger=logger)
         self.current_uid = 0
         self.control_window = simple.window("Control", x_pos=0, y_pos=0, height=800)
         self.convert_window_list = []  # todo: this stores windows indefinitely. Figure out a way to delete them.
@@ -43,18 +47,18 @@ class Polybiblioglot:
             core.add_button("Select file", callback=lambda *_: core.open_file_dialog(callback=self.select_file))
             language_list = list(lang.keys())
             core.add_text("Default Source Language:")
-            core.add_combo(f'default_source_language', label='Default Source Language', items=language_list,
+            core.add_combo(f'default_source_language', label='', items=language_list,
                            default_value='German')
             core.add_text("Default Destiation Language:")
-            core.add_combo(f'default_destination_language', label='Default Destination Language', items=language_list,
+            core.add_combo(f'default_destination_language', label='', items=language_list,
                            default_value='French')
 
             core.add_text("Translation Method:")
-            core.add_combo(f'translation_method', label='Translation Method',
+            core.add_combo(f'translation_method', label='',
                            items=list(TRANSLATOR_TYPES.__dict__.values()), default_value=TRANSLATOR_TYPES.translator)
 
             core.add_text('API token (if using IBM)')
-            core.add_input_text(f'api_token', label='API Token', password=True)
+            core.add_input_text(f'api_token', label='', password=True)
 
     def start(self):
         """
@@ -198,7 +202,7 @@ class Polybiblioglot:
         :param data: file path in the format returned by a file prompt
         :return:
         """
-        # TODO: warn user about overwriting files
+        # TODO: prompt user about overwriting files
         with open(os.path.join(*data), 'w') as f:
             f.write(self.data_to_save)
 
@@ -237,7 +241,7 @@ class Polybiblioglot:
         :return: None
         """
         if not data.pages:
-            print("No file selected or file is of the wrong type.")
+            self.logger.error("No file selected or file is of the wrong type.")
             return
 
         full_text = ''
@@ -279,7 +283,7 @@ class Polybiblioglot:
                                                     translation_method=core.get_value('translation_method'),
                                                     authentication={'token': core.get_value('api_token')})
         except ApiError as e:
-            print(f'{e}')  # TODO: make this logging
+            self.logger.error(f'API error: {e}')
             translated_text = f'{e}'
 
         data.text = translated_text
@@ -342,5 +346,27 @@ class Polybiblioglot:
 
 
 if __name__ == '__main__':
-    pbg = Polybiblioglot()
+    # Parse the arguments
+    parser = argparse.ArgumentParser(
+        prog='Polybiblioglot',
+        usage='%(prog)s [OPTION}',
+        description='A tool used to convert scanned documents to text and translate them.'
+    )
+
+    parser.add_argument('-l', '--log-level', action='store', default='INFO', dest='log_level')
+    args = parser.parse_args()
+
+    # Initialize the logger
+    logger = logging.getLogger(__name__)
+    if args.log_level:
+        logger.setLevel(args.log_level)
+
+    # Create the console handler
+    ch = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+
+    # Create and start PolyBiblioGlot
+    pbg = Polybiblioglot(logger=logger)
     pbg.start()

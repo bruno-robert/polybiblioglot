@@ -1,4 +1,7 @@
-import types, requests, json, logging
+import logging
+import requests
+import types
+
 from translate import Translator
 
 TRANSLATOR_TYPES = types.SimpleNamespace()
@@ -27,7 +30,7 @@ class ApiError(Exception):
 
 
 class MultiTranslator:
-    def __init__(self, translator_type: str, logger: logging.Logger = logging.Logger('MultiTranslator')):
+    def __init__(self, translator_type: str, logger: logging.Logger = logging.getLogger(__name__)):
         self.logger = logger
 
         if translator_type in TRANSLATOR_TYPES.__dict__.values():
