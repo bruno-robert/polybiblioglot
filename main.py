@@ -35,8 +35,8 @@ class Payload:
 class Polybiblioglot:
     def __init__(self, logger=logging.getLogger(__name__)):
         self.logger = logger
-        self.converter = Converter()
-        self.translator: MultiTranslator = MultiTranslator(TRANSLATOR_TYPES.translator)
+        self.converter = Converter(logger=logger)
+        self.translator: MultiTranslator = MultiTranslator(TRANSLATOR_TYPES.translator, logger=logger)
         self.current_uid = 0
         self.control_window = simple.window("Control", x_pos=0, y_pos=0, height=800)
         self.convert_window_list = []  # todo: this stores windows indefinitely. Figure out a way to delete them.
@@ -241,7 +241,7 @@ class Polybiblioglot:
         :return: None
         """
         if not data.pages:
-            print("No file selected or file is of the wrong type.")
+            self.logger.error("No file selected or file is of the wrong type.")
             return
 
         full_text = ''
@@ -283,7 +283,7 @@ class Polybiblioglot:
                                                     translation_method=core.get_value('translation_method'),
                                                     authentication={'token': core.get_value('api_token')})
         except ApiError as e:
-            print(f'{e}')  # TODO: make this logging
+            self.logger.error(f'API error: {e}')
             translated_text = f'{e}'
 
         data.text = translated_text
