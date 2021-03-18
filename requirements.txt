@@ -1,5 +1,5 @@
 dearpygui==0.6.123
-Pillow==8.1.0
+Pillow>=8.1.1
 pytesseract==0.3.7
 
 pdf2image~=1.14.0
