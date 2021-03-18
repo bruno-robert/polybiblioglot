@@ -29,8 +29,6 @@ jobs:
       - name: Add gitlab remote and push changes
         run: |
           git remote add gitlab ${{ secrets.REMOTE_REPOSITORY_URL }}
-          git checkout master
-          git pull origin master
           git pull gitlab master
           git status
           git push gitlab HEAD:master
