@@ -2,36 +2,23 @@
 
 name: GitlabSync
 
-# Controls when the action will run. 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-
-  workflow_dispatch:
+on: 
+  - push
+  - delete
 
 jobs:
   sync:
     runs-on: ubuntu-latest
+    name: Git Repo Sync
     steps:
-    
-      - name: Set up git repository
-        run: |
-          git config --global user.email "bruno.jeanluke@icloud.com"
-          git config --global user.name "Bruno Robert"
-          git clone ${{ secrets.CURRENT_REMOTE_REPOSITORY_URL }}
-          cd ./polybiblioglot
-          git config pull.rebase false
-
-      - name: Add gitlab remote and push changes
-        run: |
-          cd ./polybiblioglot
-          echo adding remote
-          git remote add gitlab ${{ secrets.REMOTE_REPOSITORY_URL }}
-          echo pulling from gitlab
-          git pull gitlab master
-          echo status:
-          git status
-          echo pushing to gitlab
-          git push ${{ secrets.REMOTE_REPOSITORY_URL }} HEAD:master
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - uses: wangchucheng/git-repo-sync@v0.1.0
+      with:
+        # Such as https://github.com/wangchucheng/git-repo-sync.git
+        target-url: ${{ secrets.TARGET_URL }}
+        # Such as wangchucheng
+        target-username: ${{ secrets.TARGET_USERNAME }}
+        # You can store token in your project's 'Setting > Secrets' and reference the name here. Such as ${{ secrets.ACCESS_TOKEN }}
+        target-token: ${{ secrets.TARGET_TOKEN }}
