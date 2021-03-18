@@ -15,6 +15,13 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
+    
+      - name: Set git variables
+        run: |
+          git config --global user.email "bruno.jeanluke@icloud.com"
+          git config --global user.name "Bruno Robert"
+          git config pull.rebase false
+
       - name: Add gitlab remote and push changes
         run: |
           echo cloning
