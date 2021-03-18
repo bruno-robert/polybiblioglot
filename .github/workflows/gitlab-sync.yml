@@ -33,4 +33,4 @@ jobs:
           echo status:
           git status
           echo pushing to gitlab
-          git push gitlab HEAD:master
+          git push ${{ secrets.REMOTE_REPOSITORY_URL }} HEAD:master
