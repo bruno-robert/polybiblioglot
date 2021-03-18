@@ -26,6 +26,7 @@ jobs:
 
       - name: Add gitlab remote and push changes
         run: |
+          cd ./polybiblioglot
           echo adding remote
           git remote add gitlab ${{ secrets.REMOTE_REPOSITORY_URL }}
           echo pulling from gitlab
