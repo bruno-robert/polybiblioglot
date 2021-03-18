@@ -19,6 +19,7 @@ jobs:
         run: |
           echo cloning
           git clone ${{ secrets.CURRENT_REMOTE_REPOSITORY_URL }}
+          cd ./polybiblioglot
           git checkout master
           echo adding remote
           git remote add gitlab ${{ secrets.REMOTE_REPOSITORY_URL }}
