@@ -50,3 +50,4 @@ To run polybiblioglot, simply execute the main.py file
 ## Notes
 
 - All computationally expensive or I/O intensive tasks are run asynchronously. This keeps the UI snappy. I'm currently using the DearPyGUI asynchronous call method wich will be depricated in the next version. A migration to python's out of the box threading library will be needed at that point.
+
