@@ -16,18 +16,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     
-      - name: Set git variables
+      - name: Set up git repository
         run: |
           git config --global user.email "bruno.jeanluke@icloud.com"
           git config --global user.name "Bruno Robert"
+          git clone ${{ secrets.CURRENT_REMOTE_REPOSITORY_URL }}
+          cd ./polybiblioglot
           git config pull.rebase false
 
       - name: Add gitlab remote and push changes
         run: |
-          echo cloning
-          git clone ${{ secrets.CURRENT_REMOTE_REPOSITORY_URL }}
-          cd ./polybiblioglot
-          git checkout master
           echo adding remote
           git remote add gitlab ${{ secrets.REMOTE_REPOSITORY_URL }}
           echo pulling from gitlab
