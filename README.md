@@ -1,7 +1,4 @@
-The official repo URL is https://gitlab.com/brunorobert/polybiblioglot
-Although there is a github repository located at https://github.com/bruno-robert/polybiblioglot. All new commits, pull requests, issues should be created on gitlab. 
-The github repository is setup to mirror the gitlab repository.
-
+[![CodeQL](https://github.com/bruno-robert/polybiblioglot/actions/workflows/codeql-analysis.yml/badge.svg?branch=master)](https://github.com/bruno-robert/polybiblioglot/actions/workflows/codeql-analysis.yml)
 # polybiblioglot
 
 A OCR tool to convert books scans into text and automatically translate them.
@@ -54,3 +51,4 @@ To run polybiblioglot, simply execute the main.py file
 ## Notes
 
 - All computationally expensive or I/O intensive tasks are run asynchronously. This keeps the UI snappy. I'm currently using the DearPyGUI asynchronous call method wich will be depricated in the next version. A migration to python's out of the box threading library will be needed at that point.
+
