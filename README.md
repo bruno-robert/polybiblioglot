@@ -1,3 +1,4 @@
+[![CodeQL](https://github.com/bruno-robert/polybiblioglot/actions/workflows/codeql-analysis.yml/badge.svg?branch=master)](https://github.com/bruno-robert/polybiblioglot/actions/workflows/codeql-analysis.yml)
 # polybiblioglot
 
 A OCR tool to convert books scans into text and automatically translate them.
