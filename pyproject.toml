@@ -1,9 +1,19 @@
 [tool.poetry]
 name = "polybiblioglot"
-version = "0.1.1"
+version = "0.1.5"
 description = "A tool to translate scanned books"
 authors = ["Bruno Robert <bruno.jeanluke@icloud.com>"]
-license = "GPLv3"
+readme = "README.md"
+homepage = "https://github.com/bruno-robert/polybiblioglot"
+repository = "https://github.com/bruno-robert/polybiblioglot"
+keywords = ["ocr", "translation"]
+include = [
+    "LICENSE",
+]
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
+]
+
 
 [tool.poetry.dependencies]
 python = "^3.8"
