@@ -7,10 +7,12 @@ license = "GPLv3"
 
 [tool.poetry.dependencies]
 python = "^3.8"
-Pillow-PIL = "^0.1dev"
-dearpygui = "^0.6.294"
+dearpygui = "0.6.123"
 pytesseract = "^0.3.7"
+Pillow = "^8.1.2"
 pdf2image = "^1.14.0"
+requests = "^2.25.1"
+translate = "^3.5.0"
 
 [tool.poetry.dev-dependencies]
 
