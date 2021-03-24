@@ -24,6 +24,19 @@ If you are on mac and have brew installed. It's as simple as `brew install poppl
 
 ## Installation
 
+### PyPI/pip
+
+1. (optional) Create and activate a virtual environemnt
+`python -m venv venv`
+  - linux/macos `source ./venv/bin/activate`
+  - windows `.\venv\Scripts\activate`
+2. Install PolyBiblioGlot `pip install polybiblioglot`
+
+#### Running PolyBiblioglot with pip installation
+Run with `python -m polybiblioglot`
+
+### Manual Installation
+
 Clone the repository:
 `git clone https://github.com/bruno-robert/polybiblioglot.git`
 
@@ -38,10 +51,10 @@ then
 install python dependancies
 `pip install -r requirements.txt`
 
-# Running polybiblioglot
+#### Running polybiblioglot from manual installation
 
-To run polybiblioglot, simply execute the main.py file
-`python main.py`
+To run polybiblioglot, simply execute the \_\_main\_\_.py file
+`python ./polybiblioglot/__main___.py`
 
 # Notes and limitation (for now)
 
