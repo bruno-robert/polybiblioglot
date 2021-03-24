@@ -1,0 +1,32 @@
+[tool.poetry]
+name = "polybiblioglot"
+version = "0.2.0"
+description = "A tool to translate scanned books"
+authors = ["Bruno Robert <bruno.jeanluke@icloud.com>"]
+readme = "README.md"
+homepage = "https://github.com/bruno-robert/polybiblioglot"
+repository = "https://github.com/bruno-robert/polybiblioglot"
+keywords = ["ocr", "translation"]
+include = [
+    "LICENSE",
+]
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)"
+]
+
+
+[tool.poetry.dependencies]
+python = "^3.8"
+dearpygui = "0.6.123"
+pytesseract = "^0.3.7"
+Pillow = "^8.1.2"
+pdf2image = "^1.14.0"
+requests = "^2.22.0"
+translate = "^3.5.0"
+
+[tool.poetry.dev-dependencies]
+python-changelog = "^0.2.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

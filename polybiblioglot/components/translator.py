@@ -8,6 +8,7 @@ TRANSLATOR_TYPES = types.SimpleNamespace()
 TRANSLATOR_TYPES.translator = 'translator'
 TRANSLATOR_TYPES.ibm = 'ibm'
 
+# TODO: allow the user to set this url
 IBM_TRANSLATE_URL = 'https://api.us-south.language-translator.watson.cloud.ibm.com/instances/c9cf4fc5-460c-40fa-8338-b524a9428899/v3/translate?version=2018-05-01'
 
 
