@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "polybiblioglot"
-version = "0.1.5"
+version = "0.2.0"
 description = "A tool to translate scanned books"
 authors = ["Bruno Robert <bruno.jeanluke@icloud.com>"]
 readme = "README.md"
@@ -21,10 +21,11 @@ dearpygui = "0.6.123"
 pytesseract = "^0.3.7"
 Pillow = "^8.1.2"
 pdf2image = "^1.14.0"
-requests = "^2.25.1"
+requests = "^2.22.0"
 translate = "^3.5.0"
 
 [tool.poetry.dev-dependencies]
+python-changelog = "^0.2.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
