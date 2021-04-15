@@ -1,5 +1,5 @@
-from components.translator import *
-from components.converter import *
+from polybiblioglot.components.translator import *
+from polybiblioglot.components.converter import *
 
 errors = ["InvalidTranslationMethod", "AuthenticationError", "ApiError"]
 translator_constants = ["TRANSLATOR_TYPES"]
