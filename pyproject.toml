@@ -23,6 +23,8 @@ Pillow = "^8.1.2"
 pdf2image = "^1.14.0"
 requests = "^2.22.0"
 translate = "^3.5.0"
+torch = "^1.8.1"
+torchvision = "^0.9.1"
 
 [tool.poetry.dev-dependencies]
 python-changelog = "^0.2.0"
