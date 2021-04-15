@@ -1,0 +1,1 @@
+import polybiblioglot.__main__
