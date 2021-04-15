@@ -3,8 +3,8 @@ import os
 
 from dearpygui import core, simple
 
-from polybiblioglot.components import Converter, MultiTranslator, ApiError, TRANSLATOR_TYPES
-from polybiblioglot.lang import lang
+from components import Converter, MultiTranslator, ApiError, TRANSLATOR_TYPES
+from lang import lang
 
 
 class Payload:
