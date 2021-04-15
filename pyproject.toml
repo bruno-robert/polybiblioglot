@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "polybiblioglot"
-version = "0.3.0-alpha.1"
+version = "0.3.0-alpha.2"
 description = "A tool to translate scanned books"
 authors = ["Bruno Robert <bruno.jeanluke@icloud.com>"]
 readme = "README.md"
