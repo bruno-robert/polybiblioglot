@@ -1,7 +1,0 @@
-dearpygui==0.6.123
-Pillow>=8.1.1
-pytesseract==0.3.7
-
-pdf2image~=1.14.0
-translate~=3.5.0
-requests>=2.25.1
