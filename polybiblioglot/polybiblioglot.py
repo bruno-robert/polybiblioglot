@@ -21,6 +21,15 @@ class Panel(Enum):
     right = "Right panel"
 
 
+@unique
+class Widgets(Enum):
+    """
+    This enum stores the names of important widgets such as tabs or reusable windows
+    """
+    select_new_file_tab = "select_new_file_tab"
+    selected_file_control_tab = "selected_file_control_tab"
+
+
 @dataclass
 class Payload:
     """
@@ -77,8 +86,8 @@ class Polybiblioglot:
         y_pos_panels = get_item_height('Main menu')
         height_panels = get_main_window_size()[1] - 60  # get_item_height('Main') - y_pos_panels
         width_left_panel = 300
-        width_right_panel = 400
-        width_middle_panel = width_main_window - width_left_panel - width_right_panel
+        width_middle_panel = int((width_main_window - width_left_panel) / 2)
+        width_right_panel = int((width_main_window - width_left_panel) / 2)
         x_pos_left_panel = 0
         x_pos_middle_panel = x_pos_left_panel + width_left_panel
         x_pos_right_panel = x_pos_middle_panel + width_middle_panel
@@ -116,22 +125,27 @@ class Polybiblioglot:
                     no_collapse=True, horizontal_scrollbar=False, no_focus_on_appearing=True,
                     no_bring_to_front_on_focus=False,
                     no_close=True, no_background=False, show=True):
-            add_text("Select an Image or PDF")
-            add_button("Select file", callback=lambda *_: open_file_dialog(callback=self.select_file))
-            language_list = list(lang.keys())
-            add_text("Default Source Language:")
-            add_combo(f'default_source_language', label='', items=language_list,
-                      default_value='German')
-            add_text("Default Destiation Language:")
-            add_combo(f'default_destination_language', label='', items=language_list,
-                      default_value='French')
+            tab_bar = simple.tab_bar(name="left pane tabs")
+            with tab_bar:
+                with tab(Widgets.select_new_file_tab.value, label="Select New File"):
+                    add_text("Select an Image or PDF")
+                    add_button("Select file", callback=lambda *_: open_file_dialog(callback=self.select_file))
+                    language_list = list(lang.keys())
+                    add_text("Default Source Language:")
+                    add_combo(f'default_source_language', label='', items=language_list,
+                              default_value='German')
+                    add_text("Default Destiation Language:")
+                    add_combo(f'default_destination_language', label='', items=language_list,
+                              default_value='French')
 
-            add_text("Translation Method:")
-            add_combo(f'translation_method', label='',
-                      items=list(TRANSLATOR_TYPES.__dict__.values()), default_value=TRANSLATOR_TYPES.translator)
+                    add_text("Translation Method:")
+                    add_combo(f'translation_method', label='',
+                              items=list(TRANSLATOR_TYPES.__dict__.values()), default_value=TRANSLATOR_TYPES.translator)
 
-            add_text('API token (if using IBM)')
-            add_input_text(f'api_token', label='', password=True)
+                    add_text('API token (if using IBM)')
+                    add_input_text(f'api_token', label='', password=True)
+                with tab(Widgets.selected_file_control_tab.value, label="Selected File"):
+                    pass
 
         with window(Panel.center.value, autosize=False, no_resize=True, no_title_bar=True, no_move=True,
                     no_scrollbar=True,
