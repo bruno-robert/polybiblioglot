@@ -119,6 +119,7 @@ class Polybiblioglot:
             # Create the menu
             with menu_bar('Main menu'):
                 with menu('File'):
+                    add_menu_item('Open New File', callback=lambda *_: open_file_dialog(callback=self.select_file))
                     add_menu_item('Settings')
                     add_menu_item('Save original text')
                     add_menu_item('Save translated text')
@@ -134,7 +135,7 @@ class Polybiblioglot:
                     no_close=True, no_background=False, show=True):
             tab_bar = simple.tab_bar(name="left pane tabs")
             with tab_bar:
-                with tab(Widget.select_new_file_tab.value, label="Select New File"):
+                with tab(Widget.select_new_file_tab.value, label="Select New File", show=False):
                     add_text("Select an Image or PDF")
                     add_button("Select file", callback=lambda *_: open_file_dialog(callback=self.select_file))
                     language_list = list(lang.keys())
