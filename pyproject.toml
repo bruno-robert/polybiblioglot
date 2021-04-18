@@ -17,7 +17,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 python = "^3.8"
-dearpygui = "0.6.123"
+dearpygui = "^0.6.123"
 pytesseract = "^0.3.7"
 Pillow = "^8.1.2"
 requests = "^2.22.0"
