@@ -12,22 +12,25 @@ from polybiblioglot.lang import lang
 
 
 @unique
-class Panel(Enum):
-    """
-    This enum stores the names of each of the 3 panels windows
-    """
-    left = "Left panel"
-    center = "Middle panel"
-    right = "Right panel"
-
-
-@unique
-class Widgets(Enum):
+class Widget(Enum):
     """
     This enum stores the names of important widgets such as tabs or reusable windows
     """
-    select_new_file_tab = "select_new_file_tab"
-    selected_file_control_tab = "selected_file_control_tab"
+    select_new_file_tab = "select_new_file_tab"  # the tab containing the controls for selecting a new file
+    selected_file_control_tab = "selected_file_control_tab"  # the tab containing the controls for the selected files
+    convert_button = "convert_button"  # the button to convert img/pdf to text
+    translate_button = "translate_button"  # the button to translate text
+    save_text_button = "save_text_button"  # the button the save ocr text to a file
+    ocr_text = "ocr_text"  # text field containing text gathered using ocr
+    translated_text = "translated_text"  # text field containing translated text
+    save_translated_text_button = "save_translated_text_button"  # text field containing translated text
+    source_lang_combo = "source_lang_combo"
+    destination_lang_combo = "destination_lang_combo"
+
+    # The main window panels
+    left = "Left panel"
+    center = "Middle panel"
+    right = "Right panel"
 
 
 @dataclass
@@ -62,8 +65,12 @@ class Polybiblioglot:
         self.data_to_save = ''  # this is the data that will be written to the disk by self.save_text
         self.__init_main_window()
 
+        # name and path of the selected file
+        self.selected_file_path = ""
+        self.selected_file_name = ""
+
     @staticmethod
-    def _clear_panel(panel: Panel):
+    def _clear_widget(panel: Widget):
         """
         Clears a panel by deleting all it's children.
         :param panel:
@@ -93,19 +100,19 @@ class Polybiblioglot:
         x_pos_right_panel = x_pos_middle_panel + width_middle_panel
 
         # Left panel
-        set_window_pos(Panel.left.value, x=x_pos_left_panel, y=y_pos_panels)
-        set_item_width(Panel.left.value, width=width_left_panel)
-        set_item_height(Panel.left.value, height=height_panels)
+        set_window_pos(Widget.left.value, x=x_pos_left_panel, y=y_pos_panels)
+        set_item_width(Widget.left.value, width=width_left_panel)
+        set_item_height(Widget.left.value, height=height_panels)
 
         # Middle panel
-        set_window_pos(Panel.center.value, x=x_pos_middle_panel, y=y_pos_panels)
-        set_item_width(Panel.center.value, width=width_middle_panel)
-        set_item_height(Panel.center.value, height=height_panels)
+        set_window_pos(Widget.center.value, x=x_pos_middle_panel, y=y_pos_panels)
+        set_item_width(Widget.center.value, width=width_middle_panel)
+        set_item_height(Widget.center.value, height=height_panels)
 
         # Right panel
-        set_window_pos(Panel.right.value, x=x_pos_right_panel, y=y_pos_panels)
-        set_item_width(Panel.right.value, width=width_right_panel)
-        set_item_height(Panel.right.value, height=height_panels)
+        set_window_pos(Widget.right.value, x=x_pos_right_panel, y=y_pos_panels)
+        set_item_width(Widget.right.value, width=width_right_panel)
+        set_item_height(Widget.right.value, height=height_panels)
 
     def __init_main_window(self):
         with window("Main"):
@@ -120,14 +127,14 @@ class Polybiblioglot:
                 with menu('Help'):
                     add_menu_item('About PolyBiblioGlot')
 
-        with window(Panel.left.value, autosize=False, no_resize=True, no_title_bar=True, no_move=True,
+        with window(Widget.left.value, autosize=False, no_resize=True, no_title_bar=True, no_move=True,
                     no_scrollbar=True,
                     no_collapse=True, horizontal_scrollbar=False, no_focus_on_appearing=True,
                     no_bring_to_front_on_focus=False,
                     no_close=True, no_background=False, show=True):
             tab_bar = simple.tab_bar(name="left pane tabs")
             with tab_bar:
-                with tab(Widgets.select_new_file_tab.value, label="Select New File"):
+                with tab(Widget.select_new_file_tab.value, label="Select New File"):
                     add_text("Select an Image or PDF")
                     add_button("Select file", callback=lambda *_: open_file_dialog(callback=self.select_file))
                     language_list = list(lang.keys())
@@ -144,23 +151,23 @@ class Polybiblioglot:
 
                     add_text('API token (if using IBM)')
                     add_input_text(f'api_token', label='', password=True)
-                with tab(Widgets.selected_file_control_tab.value, label="Selected File"):
+                with tab(Widget.selected_file_control_tab.value, label="Selected File"):
                     pass
 
-        with window(Panel.center.value, autosize=False, no_resize=True, no_title_bar=True, no_move=True,
+        with window(Widget.center.value, autosize=False, no_resize=True, no_title_bar=True, no_move=True,
                     no_scrollbar=True,
                     no_collapse=True, horizontal_scrollbar=False, no_focus_on_appearing=True,
                     no_bring_to_front_on_focus=False,
                     no_close=True, no_background=False, show=True):
-            add_text(Panel.center.value)
+            add_text(Widget.center.value)
 
-        with window(Panel.right.value, autosize=False, no_resize=True, no_title_bar=True, no_move=True,
+        with window(Widget.right.value, autosize=False, no_resize=True, no_title_bar=True, no_move=True,
                     no_scrollbar=True,
                     no_collapse=True, horizontal_scrollbar=False, no_focus_on_appearing=True,
                     no_bring_to_front_on_focus=False,
                     no_close=True, no_background=False,
                     show=True):  # no_background=False --> set to True to remove lines around window
-            add_text(Panel.right.value)
+            add_text(Widget.right.value)
 
         set_start_callback(self.__resize_windows)
         set_resize_callback(self.__resize_windows)
@@ -289,7 +296,7 @@ class Polybiblioglot:
         # add the window to the window list
         self.convert_window_list += [convert_window]
 
-    def update_convert_pane(self, payload: Payload):
+    def update_file_tab(self):
         """
         Updates the converter panel. This window represents a file. From this window you can convert the file to text.
         Then translate the text. And finally you can save it to a file.
@@ -302,98 +309,38 @@ class Polybiblioglot:
         :param payload: Payload object
         :return:
         """
-        self._clear_panel(Panel.center)
-        unique_id = self._get_uid()
-        window_title = f'{payload.file_name}_{str(unique_id)}'
+        self._clear_widget(Widget.selected_file_control_tab)  # WARN: a full reset like this is OP. It can be optimized
+        add_text(self.selected_file_name, parent=Widget.selected_file_control_tab.value)
 
-        # widget ids
-        top_spacer = f'top_{unique_id}'
-        bottom_spacer = f'bottom_{unique_id}'
+        language_list = list(lang.keys())
+        add_combo(Widget.source_lang_combo.value, label='Source Language', items=language_list,
+                  default_value=get_value('default_source_language'), parent=Widget.selected_file_control_tab.value)
+        add_combo(Widget.destination_lang_combo.value, label='Destination Language',
+                  items=language_list, default_value=get_value('default_destination_language'),
+                  parent=Widget.selected_file_control_tab.value)
 
-        convert_button = f'convert_{unique_id}'
-        translate_button = f'translate_{unique_id}'
-        save_text_button = f'save_text_{unique_id}'
-        save_translation_button = f'save_translation_{unique_id}'
+        add_button(Widget.convert_button.value, label='Convert to Text',
+                   callback=self.convert_file, parent=Widget.selected_file_control_tab.value)
 
-        text_spacer = f'text_spacer_{unique_id}'
-        translated_text_spacer = f'translated_text_spacer_{unique_id}'
-        tab_bar_name = f'tab_bar_{unique_id}'
-        tab_names = [f'controls_{unique_id}', f'text_{unique_id}', f'translated_{unique_id}']
-        tabs = []
-        text_value_name = f'text_{unique_id}'  # the name of the value holding the text gathered from OCR
-        source_lang_combo_name = f'text_language{unique_id}'
-        destination_lang_combo_name = f'destination_language{unique_id}'
-        translated_text_value_name = f'translated_text_{unique_id}'  # the name of the value holding the translation
-        add_value(text_value_name, '')  # the value that stores the OCR text
-        add_value(translated_text_value_name, '')  # the value that stores the translated text
+        add_button(Widget.translate_button.value, label='Translate Text', enabled=False,
+                   callback=self.translate_text, parent=Widget.selected_file_control_tab.value)
 
-        # Creating widgets
-        tab_bar = simple.tab_bar(name=tab_bar_name, parent=Panel.center.value)
-        with tab_bar:
-            tabs += [tab(tab_names[0], label="Controls")]
-            tabs += [tab(tab_names[1], label="Text")]
-            tabs += [tab(tab_names[2], label="Translation")]
+        add_button(Widget.save_text_button.value, label='Save Text', callback=self.save_prompt,
+                   callback_data=Widget.ocr_text, enabled=False, parent=Widget.selected_file_control_tab.value)
 
-            # creating the control tab
-            with tabs[0]:
-                add_text(payload.file_name)
-                add_spacing(count=1, name=top_spacer)
-                add_spacing(count=1, name=bottom_spacer)
+        add_button(Widget.save_translated_text_button.value, label='Save Translation',
+                   callback=self.save_prompt, callback_data=Widget.translated_text, enabled=False,
+                   parent=Widget.selected_file_control_tab.value)
 
-                language_list = list(lang.keys())
-                add_combo(source_lang_combo_name, label='Source Language', items=language_list,
-                          default_value=get_value('default_source_language'))
-                add_combo(destination_lang_combo_name, label='Destination Language',
-                          items=language_list, default_value=get_value('default_destination_language'))
-                # Creating payload for the convert button
-                convert_payload = Payload()
-                convert_payload.value_name = text_value_name
-                convert_payload.file_path = payload.file_path
-                convert_payload.parent = window_title
-                convert_payload.disable = [convert_button]
-                convert_payload.enable = [translate_button, save_text_button]
-                add_button(convert_button, label='Convert to Text',
-                           callback=self.convert_file, callback_data=convert_payload)
+        self._clear_widget(Widget.center)
+        add_text('File Text:', parent=Widget.center.value)
+        add_text(Widget.ocr_text.value, source=Widget.ocr_text.value, parent=Widget.center.value)
 
-                translate_payload = Payload()
-                translate_payload.value_name = text_value_name
-                translate_payload.destination_value_name = translated_text_value_name
-                translate_payload.source_language_value = source_lang_combo_name
-                translate_payload.destination_language_value = destination_lang_combo_name
-                translate_payload.disable = [translate_button]
-                translate_payload.enable = [translate_button, save_translation_button]
+        self._clear_widget(Widget.right)
+        add_text('Translated Text:', parent=Widget.right.value)
+        add_text(Widget.translated_text.value, source=Widget.translated_text.value, parent=Widget.right.value)
 
-                add_button(translate_button, label='Translate Text', enabled=False,
-                           callback=self.translate_text, callback_data=translate_payload)
-
-                save_text_payload = Payload()
-                save_text_payload.value_name = text_value_name
-                add_button(save_text_button, label='Save Text', callback=self.save_prompt,
-                           callback_data=save_text_payload, enabled=False)
-                save_translation_payload = Payload()
-                save_translation_payload.value_name = translated_text_value_name
-                add_button(save_translation_button, label='Save Translation',
-                           callback=self.save_prompt, callback_data=save_translation_payload, enabled=False)
-
-            # creating the Text tab
-            with tabs[1]:
-                add_text('File Text:')
-                add_spacing(count=1, name=text_spacer)
-
-                # this is the text box that holds the text extracted with OCR
-                add_text(f'text_box_{unique_id}', source=text_value_name)
-
-            # creating the Translation tab
-            with tabs[2]:
-                add_text('Translated text:')
-                add_spacing(count=1, name=translated_text_spacer)
-
-                # this is the text box that holds the translated text response
-                add_text(f'translated_text_box_{unique_id}', source=translated_text_value_name)
-
-        # add the window to the window list
-
-    def save_prompt(self, sender, data: Payload):
+    def save_prompt(self, sender, source_widget: Widget):
         """
         This helper fucntion will set the self.data_to_save attribute using the value passed in data.value_name.
         It will then open a file prompt that will save the data in self.data_to_save to the select file
@@ -401,7 +348,7 @@ class Polybiblioglot:
         :param data: Payload object
         :return:
         """
-        self.data_to_save = get_value(data.value_name)
+        self.data_to_save = get_value(source_widget.value)
         open_file_dialog(callback=self.save_text)
 
     def save_text(self, sender, data):
@@ -415,42 +362,44 @@ class Polybiblioglot:
         with open(os.path.join(*data), 'w') as f:
             f.write(self.data_to_save)
 
-    def convert_file(self, sender, data: Payload):
+    def convert_file(self, sender, data):
         """
-        Callback function, will convert the currently selected image into text.
+        Converts the selected file to text.
+        It's usually called as a callback of a button, this is why we have a sender and data parameters.
         :param sender: The sender object (see dearpygui documentation)
-        :param data: Payload object
+        :param data: data object (dearpygui callback parameter)
         :return: None
         """
-        # if the data has a delete element, delete it
-        self._delete_widgets(data.delete)
-        self._disable_widgets(data.disable)
-        pages = self.converter.convert_file(path=data.file_path)
+        # disable the convert button (we dont want to call this function multiple times)
+        self._disable_widgets([Widget.convert_button])
+
+        # convert the img/pdf to text
+        pages = self.converter.convert_file(path=self.selected_file_path)
         if not pages:
             self.logger.error("No file selected or file is of the wrong type.")
             return
 
+        # here we simply format the text into pages
         full_text = ''
         for page in pages:
             full_text = f'{page} - - - - - \n{full_text}'
-        set_value(data.value_name, full_text)
-        self._enable_widgets(data.enable)
+        set_value(Widget.ocr_text.value, full_text)
 
-    def translate_text(self, sender, data: Payload):
+        # once the conversion is complete, we can enable the translation button and the save text button
+        self._enable_widgets([Widget.translate_button, Widget.save_text_button])
+
+    def translate_text(self, sender, data):
         """
-        Will use data.value_name (as a key) to get text in the value storage.
-        The source language is defined in the data.source_language attribute
-        The destination language is defined in the data.destination_language
-        The translated text is stored back into a value storage using data.destination_value_name as a key
+        Translates the ocr text into the destination language
         :param sender:
-        :param data: Payload object containing the text and source+destination languages
+        :param data:
         :return:
         """
-        self._disable_widgets(data.disable)
+        self._disable_widgets([Widget.translate_button])
 
-        text = get_value(data.value_name)
-        source_lang = lang[get_value(data.source_language_value)]
-        destination_lang = lang[get_value(data.destination_language_value)]
+        text = get_value(Widget.ocr_text.value)
+        source_lang = lang[get_value(Widget.source_lang_combo.value)]
+        destination_lang = lang[get_value(Widget.destination_lang_combo.value)]
         try:
             translated_text = self.translator.translate(text, source_lang, destination_lang,
                                                         translation_method=get_value('translation_method'),
@@ -459,8 +408,9 @@ class Polybiblioglot:
             self.logger.error(f'API error: {e}')
             translated_text = f'{e}'
 
-        set_value(data.destination_value_name, translated_text)
-        self._enable_widgets(data.enable)
+        set_value(Widget.translated_text.value, translated_text)
+
+        self._enable_widgets([Widget.translate_button, Widget.save_translated_text_button])
 
     def select_file(self, sender, data):
         """
@@ -471,12 +421,11 @@ class Polybiblioglot:
         :param data: data should be the image path object of format ["path/to/directory", "file_name.png"]
         :return: None
         """
-        payload = Payload()
-        payload.file_path = os.path.join(*data)
-        payload.file_name = data[1]
-        self.update_convert_pane(payload)
+        self.selected_file_path = os.path.join(*data)
+        self.selected_file_name = data[1]
+        self.update_file_tab()
 
-    def _disable_widgets(self, widgets: [str]):
+    def _disable_widgets(self, widgets: [str, Widget]):
         """
         Helper function that takes a list of widget names (ids) and disables them
         :param widgets: list of widget names
@@ -484,9 +433,11 @@ class Polybiblioglot:
         """
         if widgets:
             for name in widgets:
+                if type(name) is Widget:
+                    name = name.value
                 configure_item(name, enabled=False)
 
-    def _enable_widgets(self, widgets: [str]):
+    def _enable_widgets(self, widgets: [str, Widget]):
         """
         Helper function that takes a list of widget names (ids) and enables them
         :param widgets: list of widgets
@@ -494,9 +445,11 @@ class Polybiblioglot:
         """
         if widgets:
             for name in widgets:
+                if type(name) is Widget:
+                    name = name.value
                 configure_item(name, enabled=True)
 
-    def _delete_widgets(self, widgets: [str]):
+    def _delete_widgets(self, widgets: [str, Widget]):
         """
         Helper function that takes a list of widget names (ids) and deletes them
         :param widgets: list of widgets
@@ -504,4 +457,6 @@ class Polybiblioglot:
         """
         if widgets:
             for name in widgets:
+                if type(name) is Widget:
+                    name = name.value
                 delete_item(name)
