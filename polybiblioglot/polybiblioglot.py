@@ -3,7 +3,6 @@ import os
 from dataclasses import dataclass, field
 from enum import Enum, unique
 
-from dearpygui import simple
 from dearpygui.core import *
 from dearpygui.simple import *
 
@@ -61,11 +60,45 @@ class Polybiblioglot:
         self.translator: MultiTranslator = MultiTranslator(TRANSLATOR_TYPES.translator, logger=logger)
         self.current_uid = 0
         self.data_to_save = ''  # this is the data that will be written to the disk by self.save_text
-        self.__init_main_window()
 
         # name and path of the selected file
         self.selected_file_path = ""
         self.selected_file_name = ""
+
+        # list of items to be centered on each resize
+        center_items = []
+        add_data('item_center_list', center_items)
+        set_render_callback(self._apply_centering)
+
+        self.__init_main_window()
+
+    @staticmethod
+    def _apply_centering():
+        items = list(get_data("item_center_list"))
+        if not items:
+            return
+        for item in items:
+            if not does_item_exist(item):  # if the item no longer exists, remove it
+                items.remove(item)
+                add_data('item_center_list', items)
+                continue
+            container_width = get_item_rect_size(get_item_parent(item))[0]
+            item_width, item_height = get_item_rect_size(item)
+            set_item_height(f'{item}_container', int(item_height))
+            pos = int((container_width / 2) - (item_width / 2))
+            set_item_width(f'{item}_dummy', pos)
+
+    @staticmethod
+    def _center_item(name: str):
+        with child(f'{name}_container', autosize_x=True, no_scrollbar=True, border=False):
+            add_dummy(name=f'{name}_dummy')
+            add_same_line(name=f'{name}_sameline')
+            move_item(name, parent=f'{name}_container')
+        items = list(get_data('item_center_list'))
+        items.append(name)
+        add_data('item_center_list', items)
+        y_space = get_style_item_spacing()[1]
+        set_item_style_var(f'{name}_container', mvGuiStyleVar_ItemSpacing, [0, y_space])
 
     @staticmethod
     def _clear_widget(panel: Widget):
@@ -129,7 +162,9 @@ class Polybiblioglot:
                     no_collapse=True, horizontal_scrollbar=False, no_focus_on_appearing=True,
                     no_bring_to_front_on_focus=False,
                     no_close=True, no_background=False, show=True):
-            add_text('Please Open a file: "File > Open File"')
+            add_spacing(count=20)
+            add_button('open_file', label='Open File', callback=lambda *_: open_file_dialog(callback=self.select_file))
+            self._center_item('open_file')
 
         with window(Widget.center.value, autosize=False, no_resize=True, no_title_bar=True, no_move=True,
                     no_scrollbar=True,
