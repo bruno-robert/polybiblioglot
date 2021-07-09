@@ -55,9 +55,14 @@ class Payload:
 
 class Polybiblioglot:
     def __init__(self, logger=logging.getLogger(__name__)):
+        """
+        Initialises polybiblioglot. Creates the Translator and Converter objects,
+        initialises the main window
+        :param logger:
+        """
         self.logger = logger
         self.converter = Converter(logger=logger)
-        self.translator: MultiTranslator = MultiTranslator(TRANSLATOR_TYPES.translator, logger=logger)
+        self.translator: MultiTranslator = MultiTranslator(TRANSLATOR_TYPES.local, logger=logger)
         self.current_uid = 0
         self.data_to_save = ''  # this is the data that will be written to the disk by self.save_text
 
@@ -146,6 +151,15 @@ class Polybiblioglot:
         set_item_height(Widget.right.value, height=height_panels)
 
     def __init_main_window(self):
+        """
+        Initialises the main window:
+        - Creates the window menu
+        - Creates the 3 pane layout
+        - Sets up the resize callbacks
+
+        This function is called at the end of the __init__() function, once most of the app is initialised
+        :return:
+        """
         with window("Main"):
             # Create the menu
             with menu_bar('Main menu'):
@@ -187,6 +201,8 @@ class Polybiblioglot:
     def start(self):
         """
         Starts the app
+
+        This function should be called after __init__()
         :return:
         """
         start_dearpygui(primary_window="Main")
@@ -201,7 +217,7 @@ class Polybiblioglot:
         self.current_uid += 1
         return uid
 
-    def update_file_tab(self):
+    def update_file_pane(self):
         """
         Updates the converter panel. This window represents a file. From this window you can convert the file to text.
         Then translate the text. And finally you can save it to a file.
@@ -306,8 +322,7 @@ class Polybiblioglot:
         destination_lang = lang[get_value(Widget.destination_lang_combo.value)]
         try:
             translated_text = self.translator.translate(text, source_lang, destination_lang,
-                                                        translation_method=TRANSLATOR_TYPES.translator,
-                                                        authentication={'token': get_value('api_token')})
+                                                        translation_method=TRANSLATOR_TYPES.local)
         except ApiError as e:
             self.logger.error(f'API error: {e}')
             translated_text = f'{e}'
@@ -327,7 +342,7 @@ class Polybiblioglot:
         """
         self.selected_file_path = os.path.join(*data)
         self.selected_file_name = data[1]
-        self.update_file_tab()
+        self.update_file_pane()
 
     def _disable_widgets(self, widgets: [str, Widget]):
         """

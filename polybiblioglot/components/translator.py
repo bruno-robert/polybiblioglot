@@ -7,13 +7,14 @@ from translate import Translator
 TRANSLATOR_TYPES = types.SimpleNamespace()
 TRANSLATOR_TYPES.translator = 'translator'
 TRANSLATOR_TYPES.ibm = 'ibm'
+TRANSLATOR_TYPES.local = 'local'
 
 # TODO: allow the user to set this url
 IBM_TRANSLATE_URL = 'https://api.us-south.language-translator.watson.cloud.ibm.com/instances/c9cf4fc5-460c-40fa-8338-b524a9428899/v3/translate?version=2018-05-01'
 
 
 # This module is used to translate text from one language to another.
-# You can speciify what API should be used
+# You can specify what API should be used
 
 # currently supported API are the free API ins the translate module
 # IBM cloud free tier
@@ -37,7 +38,7 @@ class MultiTranslator:
         if translator_type in TRANSLATOR_TYPES.__dict__.values():
             self.translator_type = translator_type
         else:
-            self.logger.error('Translator API type is not valid.')
+            self.logger.error('Translator type is not valid.')
 
     def set_api(self, translator_type: str):
         if translator_type in TRANSLATOR_TYPES.__dict__.values():
@@ -66,10 +67,24 @@ class MultiTranslator:
             self.logger.error('Translation method is invalid')
             raise InvalidTranslationMethod("Translation method is invalid")
 
-        if translation_method == TRANSLATOR_TYPES.translator:
+        if translation_method == TRANSLATOR_TYPES.local:
+            self.logger.debug('Translating locally')
+            from transformers import AutoTokenizer, MarianMTModel
+            model_name = f"Helsinki-NLP/opus-mt-{source}-{destination}"
+            model = MarianMTModel.from_pretrained(model_name)
+            tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+            # TODO: text needs to be preprocessed before translation. Empty strings and special characters slow down
+            #  translation
+            translated = model.generate(**tokenizer(text.split('.'), return_tensors="pt", padding=True))
+            output = [tokenizer.decode(t, skip_special_tokens=True) for t in translated]
+            output = '.'.join(output)
+
+        elif translation_method == TRANSLATOR_TYPES.translator:
             self.logger.debug('Translating with the translator module')
             translate = Translator(from_lang=source, to_lang=destination)
             output = translate.translate(text[:499])
+
         elif translation_method == TRANSLATOR_TYPES.ibm:
             self.logger.debug('Translating with IBM')
             try:
